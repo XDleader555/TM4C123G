@@ -40,26 +40,68 @@
 #define LOW 0
 #define HIGH 1
 
-// Sets up a gpio pin
+// Page 710 of the datasheet states 80MHz clock (12.5 ns)
+volatile unsigned long timer0_micros = 0;
+
+// Cortex M4 Assembly LDR PC is 5 cycles. Check with the professor?
+// 2-2-20 2x LDR Rx,[PC,#imm] (5 or 6), 1x LDR Rx,[Rx,#imm] (3), 1x STR Rx,[Ry,#imm] (1)
+// This operation takes at least 9 cycles
+volatile unsigned long clockDelay;
+
+void init() {
+  SYSCTL_RCGCTIMER_R |= 0x01;     // 0) activate TIMER0
+  clockDelay = SYSCTL_RCGCTIMER_R;// delay by assigning a register
+  TIMER0_CTL_R    = 0x00000000;   // 1) disable TIMER0A during setup
+  TIMER0_CFG_R    = 0x00000004;   // 2) configure for 16-bit mode
+  TIMER0_TAMR_R   = 0x00000002;   // 3) configure for periodic mode, default down-count settings
+  TIMER0_TAILR_R  = 0x00000050;   // 4) count 80 clocks, or 1 us
+  TIMER0_TAPR_R   = 0x00000000;   // 5) no prescaler
+  TIMER0_ICR_R    = 0x00000001;   // 6) clear TIMER0A timeout flag
+  TIMER0_IMR_R    = 0x00000001;   // 7) arm timeout interrupt
+  TIMER0_CTL_R    = 0x00000001;   // 8) enable TIMER0A
+}
+
+void Timer0A_Handler(void){
+  TIMER0_ICR_R = TIMER_ICR_TATOCINT;  // acknowledge TIMER0A timeout
+  timer0_micros ++;
+}
+
+unsigned long millis() {
+  return timer0_micros / 1000;
+}
+
+unsigned long micros() {
+  return timer0_micros;
+}
+
+// ToDo: Finish this function, figureout how long bitshifting takes
+// void delayMicros(uint16_t micros) {
+//   // return immediately if zero
+//   if(!micros)
+//     return; 
+// }
+
+// Sets up a gpio pin. This is an unprotected function because I'm honestly lazy.
+// ToDo: Proper data bits protections
 void pinMode(uint8_t pin, uint8_t mode) {
   volatile unsigned long * port = ports[pin / 10];
+	uint8_t port_mask = (((uint8_t) 1) << (pin / 10));
   uint8_t pin_mask = (((uint8_t) 1) << (pin % 10));
 
-  SYSCTL_RCGC2_R |= ((uint64_t) pin_mask);    // gpio clock
-  //delay = SYSCTL_RCGC2_R;                     // delay ToDo: does this do anything?
-  portData(port, P_LOCK)   =  0x4C4F434B;     // unlock port
+  SYSCTL_RCGC2_R |= ((uint64_t) port_mask);   // gpio clock
+  clockDelay = SYSCTL_RCGC2_R;                // delay by assigning a register
+	if(pin == PC0 || pin == PC1 || pin == PC2 || pin == PD7 || pin == PF0) {
+		portData(port, P_LOCK)   =  0x4C4F434B;     // unlock port
+	}
   setbit(portData(port, P_CR), pin_mask);     // allow changes to pin
+	clrbit(portData(port, P_AMSEL), pin_mask);  // Force digital instead of analog
   clrbit(portData(port, P_PCTL), pin_mask);   // GPIO clear bit PCTL
-  clrbit(portData(port, P_AFSEL), pin_mask);  // Regular IO
   
   clrbit(portData(port, P_PUR), pin_mask);    // clear pullup bit
   clrbit(portData(port, P_PDR), pin_mask);    // clear pulldown bit
 
   if(mode == INPUT) {
     clrbit(portData(port, P_DIR), pin_mask);  // Set Direction as input
-
-    /* INFO: I believe this allows us to choose between HIGH/LOW and 0-255? */
-    clrbit(portData(port, P_AMSEL), pin_mask);  // disable Analog Mode Select
 
     if(mode == INPUT_PULLUP) {
       setbit(portData(port, P_PUR), pin_mask);  // enable pullup resistor
@@ -72,6 +114,7 @@ void pinMode(uint8_t pin, uint8_t mode) {
     setbit(portData(port, P_DIR), pin_mask);  // Set Direction as output
   }
   
+  clrbit(portData(port, P_AFSEL), pin_mask);  // Regular IO
   setbit(portData(port, P_DEN), pin_mask);    // enable digital pins PF4-PF0
 }
 
