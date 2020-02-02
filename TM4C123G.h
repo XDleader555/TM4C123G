@@ -21,12 +21,16 @@
 #ifndef TM4C123G_H
 #define TM4C123G_H
 
+#include <stdint.h>
 #include "include/tm4c123gh6pm.h"
 #include "pins.h"
 
 // These are 8 bit functions
-#define clrbit(datacl, mask) (data, mask))
+#define clrbit(data, mask) (data &= ~mask)
 #define setbit(data, mask) (data |= mask)
+
+// port data macro for functions
+#define portData(port_offset, data_offset) (*(port_offset + data_offset))
 
 #define OUTPUT 0
 #define INPUT 1
@@ -42,7 +46,7 @@ void pinMode(uint8_t pin, uint8_t mode) {
   uint8_t pin_mask = (((uint8_t) 1) << (pin % 10));
 
   SYSCTL_RCGC2_R |= ((uint64_t) pin_mask);    // gpio clock
-  delay = SYSCTL_RCGC2_R;                     // delay ToDo: does this do anything?
+  //delay = SYSCTL_RCGC2_R;                     // delay ToDo: does this do anything?
   portData(port, P_LOCK)   =  0x4C4F434B;     // unlock port
   setbit(portData(port, P_CR), pin_mask);     // allow changes to pin
   clrbit(portData(port, P_PCTL), pin_mask);   // GPIO clear bit PCTL
@@ -84,15 +88,15 @@ void digitalWrite(uint8_t pin, uint8_t data) {
 }
 
 // Read a pin, returns low or high
-uint8_t digitalRead(uint_t pin) {
+uint8_t digitalRead(uint8_t pin) {
   volatile unsigned long * port = ports[pin / 10];
   uint8_t pin_mask = (((uint8_t) 1) << (pin % 10));
 
   if(portData(port, P_DATA) & pin_mask) {
-    return HIGH
+    return HIGH;
   }
   
-  return LOW
+  return LOW;
 }
 
 #endif /* TM4C123G_H */

@@ -3,7 +3,7 @@
 
   Copyright (c) 2020 Andrew Miyaguchi. All rights reserved.
 
-  Based on the arduino environment for simplifying the pin process
+  Loosely based on the arduino environment for simplifying the pin process
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -78,7 +78,7 @@
 #define PF4 (54)
 
 // Port offsets
-const volatile unsigned long * ports[] = {
+volatile unsigned long * ports[] = {
     GPIO_PORTA_DATA_BITS_R,
     GPIO_PORTB_DATA_BITS_R,
     GPIO_PORTC_DATA_BITS_R,
@@ -88,34 +88,29 @@ const volatile unsigned long * ports[] = {
 };
 
 // Port data offsets
-#define P_DATA      (0x3FC)
-#define P_DIR       (0x400)
-#define P_IS        (0x404)
-#define P_IBE       (0x408)
-#define P_IEV       (0x40C)
-#define P_IM        (0x410)
-#define P_RIS       (0x414)
-#define P_MIS       (0x418)
-#define P_ICR       (0x41C)
-#define P_AFSEL     (0x420)
-#define P_DR2R      (0x500)
-#define P_DR4R      (0x504)
-#define P_DR8R      (0x508)
-#define P_ODR       (0x50C)
-#define P_PUR       (0x510)
-#define P_PDR       (0x514)
-#define P_SLR       (0x518)
-#define P_DEN       (0x51C)
-#define P_LOCK      (0x520)
-#define P_CR        (0x524)
-#define P_AMSEL     (0x528)
-#define P_PCTL      (0x52C)
-#define P_ADCCTL    (0x530)
-#define P_DMACTL    (0x534)
-
-// port data macro for functions
-volatile unsigned long portData(volatile unsigned long * port_offset, unsigned long data_offset) {
-    return *(port_offset + data_offset);
-};
+#define P_DATA      ((volatile unsigned long) 0x3FC)
+#define P_DIR       ((volatile unsigned long) 0x400)
+#define P_IS        ((volatile unsigned long) 0x404)
+#define P_IBE       ((volatile unsigned long) 0x408)
+#define P_IEV       ((volatile unsigned long) 0x40C)
+#define P_IM        ((volatile unsigned long) 0x410)
+#define P_RIS       ((volatile unsigned long) 0x414)
+#define P_MIS       ((volatile unsigned long) 0x418)
+#define P_ICR       ((volatile unsigned long) 0x41C)
+#define P_AFSEL     ((volatile unsigned long) 0x420)
+#define P_DR2R      ((volatile unsigned long) 0x500)
+#define P_DR4R      ((volatile unsigned long) 0x504)
+#define P_DR8R      ((volatile unsigned long) 0x508)
+#define P_ODR       ((volatile unsigned long) 0x50C)
+#define P_PUR       ((volatile unsigned long) 0x510)
+#define P_PDR       ((volatile unsigned long) 0x514)
+#define P_SLR       ((volatile unsigned long) 0x518)
+#define P_DEN       ((volatile unsigned long) 0x51C)
+#define P_LOCK      ((volatile unsigned long) 0x520)
+#define P_CR        ((volatile unsigned long) 0x524)
+#define P_AMSEL     ((volatile unsigned long) 0x528)
+#define P_PCTL      ((volatile unsigned long) 0x52C)
+#define P_ADCCTL    ((volatile unsigned long) 0x530)
+#define P_DMACTL    ((volatile unsigned long) 0x534)
 
 #endif /* PINS_H */
