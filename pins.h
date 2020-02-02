@@ -23,7 +23,7 @@
 #ifndef PINS_H
 #define PINS_H
 
-#include "tm4c123gh6pm.h"
+#include "include/tm4c123gh6pm.h"
 
 // Arbitray numbers, the first being the port, and the second being the gpio
 #define PA0 (00)
@@ -78,7 +78,7 @@
 #define PF4 (54)
 
 // Port offsets
-const volatile unsigned long * ports[] {
+const volatile unsigned long * ports[] = {
     GPIO_PORTA_DATA_BITS_R,
     GPIO_PORTB_DATA_BITS_R,
     GPIO_PORTC_DATA_BITS_R,
