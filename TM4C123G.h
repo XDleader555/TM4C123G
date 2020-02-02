@@ -41,21 +41,21 @@ void pinMode(uint8_t pin, uint8_t mode) {
   volatile unsigned long * port = ports[pin / 10];
   uint8_t pin_mask = (((uint8_t) 1) << (pin % 10));
 
-  SYSCTL_RCGC2_R |= pin_mask;             // gpio clock
-  delay = SYSCTL_RCGC2_R;                 // delay ToDo: does this do anything?
-  portData(port, P_LOCK)   =  0x4C4F434B; // unlock port
-  setbit(portData(port, P_CR), pin_mask);   // allow changes to pin
+  SYSCTL_RCGC2_R |= ((uint64_t) pin_mask);    // gpio clock
+  delay = SYSCTL_RCGC2_R;                     // delay ToDo: does this do anything?
+  portData(port, P_LOCK)   =  0x4C4F434B;     // unlock port
+  setbit(portData(port, P_CR), pin_mask);     // allow changes to pin
   clrbit(portData(port, P_PCTL), pin_mask);   // GPIO clear bit PCTL
-  clrbit(portData(port, P_AFSEL), pin_mask);   // Regular IO
+  clrbit(portData(port, P_AFSEL), pin_mask);  // Regular IO
   
-  clrbit(portData(port, P_PUR), pin_mask);   // clear pullup bit
-  clrbit(portData(port, P_PDR), pin_mask);   // clear pulldown bit
+  clrbit(portData(port, P_PUR), pin_mask);    // clear pullup bit
+  clrbit(portData(port, P_PDR), pin_mask);    // clear pulldown bit
 
   if(mode == INPUT) {
-    clrbit(portData(port, P_DIR), pin_mask);   // Set Direction as input
+    clrbit(portData(port, P_DIR), pin_mask);  // Set Direction as input
 
     /* INFO: I believe this allows us to choose between HIGH/LOW and 0-255? */
-    clrbit(portData(port, P_AMSEL), pin_mask); // disable Analog Mode Select
+    clrbit(portData(port, P_AMSEL), pin_mask);  // disable Analog Mode Select
 
     if(mode == INPUT_PULLUP) {
       setbit(portData(port, P_PUR), pin_mask);  // enable pullup resistor
@@ -65,10 +65,10 @@ void pinMode(uint8_t pin, uint8_t mode) {
       setbit(portData(port, P_PDR), pin_mask);
     }
   } else {
-    setbit(portData(port, P_DIR), pin_mask);    // Set Direction as output
+    setbit(portData(port, P_DIR), pin_mask);  // Set Direction as output
   }
   
-  setbit(portData(port, P_DEN), pin_mask);   // enable digital pins PF4-PF0
+  setbit(portData(port, P_DEN), pin_mask);    // enable digital pins PF4-PF0
 }
 
 // Set a pin to low or high
