@@ -30,7 +30,7 @@
 #define setbit(data, mask) (data |= mask)
 
 // port data macro for functions
-#define portData(port_offset, data_offset) (*(port_offset + data_offset))
+#define portData(port_offset, data_offset) (*(port_offset + (data_offset / sizeof(port_offset))))
 
 #define OUTPUT 0
 #define INPUT 1
