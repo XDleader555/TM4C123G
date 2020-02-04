@@ -90,9 +90,7 @@ void pinMode(uint8_t pin, uint8_t mode) {
 
   SYSCTL_RCGC2_R |= ((uint64_t) port_mask);   // gpio clock
   clockDelay = SYSCTL_RCGC2_R;                // delay by assigning a register
-	if(pin == PC0 || pin == PC1 || pin == PC2 || pin == PD7 || pin == PF0) {
-		portData(port, P_LOCK)   =  0x4C4F434B;     // unlock port
-	}
+	portData(port, P_LOCK)   =  0x4C4F434B;     // unlock port
   setbit(portData(port, P_CR), pin_mask);     // allow changes to pin
 	clrbit(portData(port, P_AMSEL), pin_mask);  // Force digital instead of analog
   clrbit(portData(port, P_PCTL), pin_mask);   // GPIO clear bit PCTL
@@ -100,17 +98,13 @@ void pinMode(uint8_t pin, uint8_t mode) {
   clrbit(portData(port, P_PUR), pin_mask);    // clear pullup bit
   clrbit(portData(port, P_PDR), pin_mask);    // clear pulldown bit
 
-  if(mode == INPUT) {
-    clrbit(portData(port, P_DIR), pin_mask);  // Set Direction as input
-
-    if(mode == INPUT_PULLUP) {
-      setbit(portData(port, P_PUR), pin_mask);  // enable pullup resistor
-    }
-
-    if(mode == INPUT_PULLDOWN) {
-      setbit(portData(port, P_PDR), pin_mask);
-    }
-  } else {
+	if(mode == INPUT_PULLUP) {
+		clrbit(portData(port, P_DIR), pin_mask);  // Set Direction as input
+		setbit(portData(port, P_PUR), pin_mask);  // enable pullup resistor
+	} else if(mode == INPUT_PULLDOWN) {
+		clrbit(portData(port, P_DIR), pin_mask);  // Set Direction as input
+		setbit(portData(port, P_PDR), pin_mask);
+	} else {
     setbit(portData(port, P_DIR), pin_mask);  // Set Direction as output
   }
   
