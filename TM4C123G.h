@@ -22,6 +22,7 @@
 #define TM4C123G_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "include/tm4c123gh6pm.h"
 #include "pins.h"
 
@@ -48,7 +49,7 @@ volatile unsigned long timer0_micros = 0;
 // This operation takes at least 9 cycles
 volatile unsigned long clockDelay;
 
-void init() {
+void TM4C123G_Init() {
   SYSCTL_RCGCTIMER_R |= 0x01;     // 0) activate TIMER0
   clockDelay = SYSCTL_RCGCTIMER_R;// delay by assigning a register
   TIMER0_CTL_R    = 0x00000000;   // 1) disable TIMER0A during setup
