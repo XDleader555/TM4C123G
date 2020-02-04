@@ -49,6 +49,8 @@ volatile unsigned long timer0_micros = 0;
 // This operation takes at least 9 cycles
 volatile unsigned long clockDelay;
 
+
+// Timer0 to 5 memory map: MAP 0x40030000, 0x40035FC0 READ WRITE
 void TM4C123G_Init() {
   SYSCTL_RCGCTIMER_R |= 0x01;     // 0) activate TIMER0
   clockDelay = SYSCTL_RCGCTIMER_R;// delay by assigning a register
@@ -59,6 +61,8 @@ void TM4C123G_Init() {
   TIMER0_TAPR_R   = 0x00000000;   // 5) no prescaler
   TIMER0_ICR_R    = 0x00000001;   // 6) clear TIMER0A timeout flag
   TIMER0_IMR_R    = 0x00000001;   // 7) arm timeout interrupt
+  NVIC_PRI4_R = (NVIC_PRI4_R&0x00FFFFFF)|0x40000000; // 8) priority 2
+  NVIC_EN0_R |= 0x00080000;    // 9) enable interrupt 19 in NVIC
   TIMER0_CTL_R    = 0x00000001;   // 8) enable TIMER0A
 }
 
