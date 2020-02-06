@@ -51,6 +51,7 @@ volatile unsigned long clockDelay;
 
 
 // Timer0 to 5 memory map: MAP 0x40030000, 0x40035FC0 READ WRITE
+// http://shukra.cedt.iisc.ernet.in/edwiki/EmSys:TM4C123_Timer_Programming
 void TM4C123G_Init() {
   SYSCTL_RCGCTIMER_R |= 0x01;     // 0) activate TIMER0
   clockDelay = SYSCTL_RCGCTIMER_R;// delay by assigning a register
