@@ -68,8 +68,6 @@
 #define PE3 (43)
 #define PE4 (44)
 #define PE5 (45)
-#define PE6 (46)
-#define PE7 (47)
 
 #define PF0 (50)
 #define PF1 (51)
