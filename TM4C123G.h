@@ -1,4 +1,4 @@
-/*
+	/*
   TM4C123G.h - Development functions and macros for the TM4C123G
 
   Copyright (c) 2020 Andrew Miyaguchi. All rights reserved.
@@ -49,26 +49,15 @@ volatile unsigned long timer0_micros = 0;
 // This operation takes at least 9 cycles
 volatile unsigned long clockDelay;
 
-
-// Timer0 to 5 memory map: MAP 0x40030000, 0x40035FC0 READ WRITE
-// http://shukra.cedt.iisc.ernet.in/edwiki/EmSys:TM4C123_Timer_Programming
-void TM4C123G_Init() {
-  SYSCTL_RCGCTIMER_R |= 0x01;     // 0) activate TIMER0
-  clockDelay = SYSCTL_RCGCTIMER_R;// delay by assigning a register
-  TIMER0_CTL_R    = 0x00000000;   // 1) disable TIMER0A during setup
-  TIMER0_CFG_R    = 0x00000004;   // 2) configure for 16-bit mode
-  TIMER0_TAMR_R   = 0x00000002;   // 3) configure for periodic mode, default down-count settings
-  TIMER0_TAILR_R  = 0x00000050;   // 4) count 80 clocks, or 1 us
-  TIMER0_TAPR_R   = 0x00000000;   // 5) no prescaler
-  TIMER0_ICR_R    = 0x00000001;   // 6) clear TIMER0A timeout flag
-  TIMER0_IMR_R    = 0x00000001;   // 7) arm timeout interrupt
-  NVIC_PRI4_R = (NVIC_PRI4_R&0x00FFFFFF)|0x40000000; // 8) priority 2
-  NVIC_EN0_R |= 0x00080000;    // 9) enable interrupt 19 in NVIC
-  TIMER0_CTL_R    = 0x00000001;   // 8) enable TIMER0A
+void SysTick_Init() {
+  NVIC_ST_CTRL_R = 0x00;
+  NVIC_ST_RELOAD_R = 0x00000050;    // count 80 ticks, or 1 us
+  NVIC_ST_CURRENT_R = 0;            // Set to zero so we 
+  NVIC_SYS_PRI3_R = NVIC_SYS_PRI3_R & 0X00FFFFFF;  // Interrupt vector priority 0
+  NVIC_ST_CTRL_R = NVIC_ST_CTRL_ENABLE + NVIC_ST_CTRL_CLK_SRC + NVIC_ST_CTRL_INTEN;  // Use system clock
 }
 
-void Timer0A_Handler(void){
-  TIMER0_ICR_R = TIMER_ICR_TATOCINT;  // acknowledge TIMER0A timeout
+void SysTick_Handler(void){
   timer0_micros ++;
 }
 
@@ -78,6 +67,12 @@ unsigned long millis() {
 
 unsigned long micros() {
   return timer0_micros;
+}
+
+void delay(unsigned long ms) {
+  unsigned long startTime = millis();
+
+  while(millis() - startTime <= ms) {} 
 }
 
 // ToDo: Finish this function, figureout how long bitshifting takes
