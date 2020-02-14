@@ -41,7 +41,7 @@
 #define LOW 0
 #define HIGH 1
 
-// Page 710 of the datasheet states 80MHz clock (12.5 ns)
+// Page 710 of the datasheet states 16Mhz crystal (62.5 ns)
 volatile unsigned long timer0_micros = 0;
 
 // Cortex M4 Assembly LDR PC is 5 cycles. Check with the professor?
@@ -51,14 +51,14 @@ volatile unsigned long clockDelay;
 
 void SysTick_Init() {
   NVIC_ST_CTRL_R = 0x00;
-  NVIC_ST_RELOAD_R = 0x00000050;    // count 80 ticks, or 1 us
+  NVIC_ST_RELOAD_R = 80 - 1;    // count 80 ticks, or 5 us, dont forget we're indexed at zero
   NVIC_ST_CURRENT_R = 0;            // Set to zero so we 
   NVIC_SYS_PRI3_R = NVIC_SYS_PRI3_R & 0X00FFFFFF;  // Interrupt vector priority 0
   NVIC_ST_CTRL_R = NVIC_ST_CTRL_ENABLE + NVIC_ST_CTRL_CLK_SRC + NVIC_ST_CTRL_INTEN;  // Use system clock
 }
 
 void SysTick_Handler(void){
-  timer0_micros ++;
+  timer0_micros += 5;
 }
 
 unsigned long millis() {
@@ -75,12 +75,16 @@ void delay(unsigned long ms) {
   while(millis() - startTime <= ms) {} 
 }
 
-// ToDo: Finish this function, figureout how long bitshifting takes
-// void delayMicros(uint16_t micros) {
-//   // return immediately if zero
-//   if(!micros)
-//     return; 
-// }
+void delayMicros(uint16_t us) {
+  // return immediately if zero
+  if(!us)
+    return; 
+
+  unsigned long startTime = micros();
+  
+  // ToDo: Finish this function, figureout how long bitshifting takes
+  while(micros() - startTime > us) {}
+}
 
 // Sets up a gpio pin. This is an unprotected function because I'm honestly lazy.
 // ToDo: Proper data bits protections
