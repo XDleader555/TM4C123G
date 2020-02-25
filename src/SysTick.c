@@ -51,11 +51,12 @@ void delay(unsigned long ms) {
 }
 
 void delayMicros(uint16_t us) {
+	unsigned long startTime;
   // return immediately if zero
   if(!us)
     return; 
 
-  unsigned long startTime = micros();
+  startTime = micros();
   
   // ToDo: Finish this function, figureout how long bitshifting takes
   while(micros() - startTime > us) {}
