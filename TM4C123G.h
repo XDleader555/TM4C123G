@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "include/tm4c123gh6pm.h"
+#include "tm4c123gh6pm.h"
 #include "pins.h"	
 
 // These are 8 bit functions

@@ -23,7 +23,7 @@
 #ifndef PINS_H
 #define PINS_H
 
-#include "include/tm4c123gh6pm.h"
+#include "tm4c123gh6pm.h"
 
 // Arbitray numbers, the first being the port, and the second being the gpio
 #define PA0 (00)
