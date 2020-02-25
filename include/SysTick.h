@@ -21,6 +21,9 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#ifndef SYSTICK_H
+#define SYSTICK_H
+
 #include <stdint.h>
 #include "tm4c123gh6pm.h"
 #include "PLL.h"
@@ -40,3 +43,5 @@ unsigned long micros(void);
 void delay(unsigned long ms);
 
 void delayMicros(uint16_t us);
+
+#endif /* SYSTICK_H */
