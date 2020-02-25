@@ -23,7 +23,11 @@
 
 #include "SysTick.h"
 
+// Page 710 of the datasheet states 80MHz clock (12.5 ns)
+volatile unsigned long timer0_micros;
+
 void SysTick_Init(void){
+	timer0_micros = 0;								// Clear our timer
 	PLL_Init();												// Use PLL 80Mhz clock source
   NVIC_ST_CTRL_R = 0x00;						// disable systick during setup
   NVIC_ST_RELOAD_R = 80 - 1;    		// count 80 ticks, or 1 us, dont forget we're indexed at zero

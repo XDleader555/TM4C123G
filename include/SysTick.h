@@ -28,9 +28,6 @@
 #include "tm4c123gh6pm.h"
 #include "PLL.h"
 
-// Page 710 of the datasheet states 80MHz clock (12.5 ns)
-volatile unsigned long timer0_micros = 0;
-
 // Initialize SysTick with busy wait running at bus clock.
 void SysTick_Init(void);
 
