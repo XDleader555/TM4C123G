@@ -1,46 +1,41 @@
-// SysTick.h
-// Runs on LM4F120/TM4C123
-// Provide functions that initialize the SysTick module, wait at least a
-// designated number of clock cycles, and wait approximately a multiple
-// of 10 milliseconds using busy wait.  After a power-on-reset, the
-// LM4F120 gets its clock from the 16 MHz precision internal oscillator,
-// which can vary by +/- 1% at room temperature and +/- 3% across all
-// temperature ranges.  If you are using this module, you may need more
-// precise timing, so it is assumed that you are using the PLL to set
-// the system clock to 50 MHz.  This matters for the function
-// SysTick_Wait10ms(), which will wait longer than 10 ms if the clock is
-// slower.
-// Daniel Valvano
-// September 11, 2013
+/*
+  SysTick.c - Timing functions based on systick for the TM4C123G
+	
+	Function to initialize the systick timer and delay functions
+	Based on Daniel Valvano's SysTick.h
+	
+  Copyright (c) 2020 Andrew Miyaguchi. All rights reserved.
 
-/* This example accompanies the books
-   "Embedded Systems: Introduction to ARM Cortex M Microcontrollers",
-   ISBN: 978-1469998749, Jonathan Valvano, copyright (c) 2013
-   Volume 1, Program 4.7
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-   "Embedded Systems: Real Time Interfacing to ARM Cortex M Microcontrollers",
-   ISBN: 978-1463590154, Jonathan Valvano, copyright (c) 2013
-   Program 2.11, Section 2.6
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
- Copyright 2013 by Jonathan W. Valvano, valvano@mail.utexas.edu
-    You may use, edit, run or distribute this file
-    as long as the above copyright notice remains
- THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, WHETHER EXPRESS, IMPLIED
- OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF
- MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
- VALVANO SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
- OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
- For more information about my classes, my research, and my books, see
- http://users.ece.utexas.edu/~valvano/
- */
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*/
+
+#include "tm4c123gh6pm.h"
+#include <stdint.h>
+
+// Page 710 of the datasheet states 16Mhz crystal (62.5 ns)
+volatile unsigned long timer0_micros = 0;
 
 // Initialize SysTick with busy wait running at bus clock.
 void SysTick_Init(void);
 
-// Time delay using busy wait.
-// The delay parameter is in units of the core clock. (units of 20 nsec for 50 MHz clock)
-void SysTick_Wait(unsigned long delay);
+void SysTick_Handler(void);
 
-// Time delay using busy wait.
-// This assumes 50 MHz system clock.
-void SysTick_Wait10ms(unsigned long delay);
+unsigned long millis(void);
+
+unsigned long micros(void);
+
+void delay(unsigned long ms);
+
+void delayMicros(uint16_t us);

@@ -24,7 +24,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "include/tm4c123gh6pm.h"
-#include "pins.h"
+#include "pins.h"	
 
 // These are 8 bit functions
 #define clrbit(data, mask) (data &= ~mask)
@@ -41,50 +41,10 @@
 #define LOW 0
 #define HIGH 1
 
-// Page 710 of the datasheet states 16Mhz crystal (62.5 ns)
-volatile unsigned long timer0_micros = 0;
-
 // Cortex M4 Assembly LDR PC is 5 cycles. Check with the professor?
 // 2-2-20 2x LDR Rx,[PC,#imm] (5 or 6), 1x LDR Rx,[Rx,#imm] (3), 1x STR Rx,[Ry,#imm] (1)
 // This operation takes at least 9 cycles
 volatile unsigned long clockDelay;
-
-void SysTick_Init() {
-  NVIC_ST_CTRL_R = 0x00;
-  NVIC_ST_RELOAD_R = 80 - 1;    // count 80 ticks, or 5 us, dont forget we're indexed at zero
-  NVIC_ST_CURRENT_R = 0;            // Set to zero so we 
-  NVIC_SYS_PRI3_R = NVIC_SYS_PRI3_R & 0X00FFFFFF;  // Interrupt vector priority 0
-  NVIC_ST_CTRL_R = NVIC_ST_CTRL_ENABLE + NVIC_ST_CTRL_CLK_SRC + NVIC_ST_CTRL_INTEN;  // Use system clock
-}
-
-void SysTick_Handler(void){
-  timer0_micros += 5;
-}
-
-unsigned long millis() {
-  return timer0_micros / 1000;
-}
-
-unsigned long micros() {
-  return timer0_micros;
-}
-
-void delay(unsigned long ms) {
-  unsigned long startTime = millis();
-
-  while(millis() - startTime <= ms) {} 
-}
-
-void delayMicros(uint16_t us) {
-  // return immediately if zero
-  if(!us)
-    return; 
-
-  unsigned long startTime = micros();
-  
-  // ToDo: Finish this function, figureout how long bitshifting takes
-  while(micros() - startTime > us) {}
-}
 
 // Sets up a gpio pin. This is an unprotected function because I'm honestly lazy.
 // ToDo: Proper data bits protections
