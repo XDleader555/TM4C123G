@@ -21,10 +21,11 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include "tm4c123gh6pm.h"
 #include <stdint.h>
+#include "tm4c123gh6pm.h"
+#include "PLL.h"
 
-// Page 710 of the datasheet states 16Mhz crystal (62.5 ns)
+// Page 710 of the datasheet states 80MHz clock (12.5 ns)
 volatile unsigned long timer0_micros = 0;
 
 // Initialize SysTick with busy wait running at bus clock.
