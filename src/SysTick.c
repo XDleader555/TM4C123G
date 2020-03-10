@@ -25,19 +25,50 @@
 
 // Page 710 of the datasheet states 80MHz clock (12.5 ns)
 volatile unsigned long timer0_micros;
+void (*_SysTick_Handler)(void);
 
-void SysTick_Init(void){
-	timer0_micros = 0;								// Clear our timer
-	PLL_Init();												// Use PLL 80Mhz clock source
+void micros_handle(void) {
+  timer0_micros ++;
+}
+
+/**
+ * Friendly systick initialization function. Expanded to allow configuration
+ * of pll, handler, and reload value
+ * @param pllinit PLL Init handler
+ * @param handler systick overflow handler
+ * @param reload  systick overflow count
+ */
+void SysTick_Init(void (*pllinit)(void), void (*handler)(void), uint16_t reload) {
+  // Init the PLL if requested
+  if(pllinit != NULL)
+    (*pllinit)();
+  
+  // Assign internal handler for when systick overflows
+  _SysTick_Handler = handler;
+
+  // Initialize the systick
   NVIC_ST_CTRL_R = 0x00;						// disable systick during setup
-  NVIC_ST_RELOAD_R = 80 - 1;    		// count 80 ticks, or 1 us, dont forget we're indexed at zero
+  NVIC_ST_RELOAD_R = reload - 1;    		// count 80 ticks, or 1 us, dont forget we're indexed at zero
   NVIC_ST_CURRENT_R = 0;            // Set to zero so we start at the max value
   NVIC_SYS_PRI3_R = NVIC_SYS_PRI3_R & 0X00FFFFFF;  // Interrupt vector priority 0
   NVIC_ST_CTRL_R = NVIC_ST_CTRL_ENABLE + NVIC_ST_CTRL_CLK_SRC + NVIC_ST_CTRL_INTEN;  // Use system clock
 }
 
+/**
+ * Automatically setup systick for millis() and micros() usage
+ * Set the PLL to 80Mhz and reload every 80 ticks
+ */
+void SysTick_Init(void){
+	timer0_micros = 0;								                // Clear our millis timer
+  SysTick_Init(&(PLL_Init), &(micros_handle), 80);  // Init the systick
+}
+
+/**
+ * Call the systick handler helper function which should always be set by
+ * systick init. We avoid the null pointer check to reduce overhead
+ */
 void SysTick_Handler(void){
-  timer0_micros ++;
+  (*_SysTick_Handler)();
 }
 
 unsigned long millis(void) {
