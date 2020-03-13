@@ -23,6 +23,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include "tm4c123gh6pm.h"
 #include "SysTick.h"
 #include "pins.h"	
@@ -41,6 +42,10 @@
 
 #define LOW 0
 #define HIGH 1
+
+#define RISING 2
+#define FALLING 3
+#define CHANGE 4
 
 // Cortex M4 Assembly LDR PC is 5 cycles. Check with the professor?
 // 2-2-20 2x LDR Rx,[PC,#imm] (5 or 6), 1x LDR Rx,[Rx,#imm] (3), 1x STR Rx,[Ry,#imm] (1)
@@ -76,6 +81,24 @@ void pinMode(uint8_t pin, uint8_t mode) {
   
   clrbit(portData(port, P_AFSEL), pin_mask);  // Regular IO
   setbit(portData(port, P_DEN), pin_mask);    // enable digital pins PF4-PF0
+}
+
+/**
+ * Setup a pin for interrupts
+ */
+void attachInterrupt(uint8_t pin, uint8_t mode) {
+  volatile unsigned long * port = ports[pin / 10];
+	//uint8_t port_mask = (((uint8_t) 1) << (pin / 10));
+  uint8_t pin_mask = (((uint8_t) 1) << (pin % 10));
+
+  // Setup trigger
+  if(mode == RISING) {
+    clrbit(portData(port, P_IS), pin_mask);   // Interrupt Sense 0=edge-sensitive, 1=level-sensitive
+    clrbit(portData(port, P_IBE), pin_mask);  // 1=Both edges, 0=Interrupt Event
+    setbit(portData(port, P_IEV), pin_mask);  // Interrupt Event (1=Rising, 0=Falling)
+  }
+  setbit(portData(port, P_ICR), pin_mask);  // Reset Interrupt Flag
+  setbit(portData(port, P_IM), pin_mask);  // Enable Interrupt
 }
 
 // Set a pin to low or high
