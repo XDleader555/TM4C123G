@@ -38,7 +38,7 @@ void micros_handle(void) {
  * @param handler systick overflow handler
  * @param reload  systick overflow count
  */
-void SysTick_Init(void (*pllinit)(void), void (*handler)(void), uint16_t reload) {
+void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t reload) {
   // Init the PLL if requested
   if(pllinit != NULL)
     (*pllinit)();
@@ -60,7 +60,7 @@ void SysTick_Init(void (*pllinit)(void), void (*handler)(void), uint16_t reload)
  */
 void SysTick_Init(void){
 	timer0_micros = 0;								                // Clear our millis timer
-  SysTick_Init(&(PLL_Init), &(micros_handle), 80);  // Init the systick
+  SysTick_Init_Custom(&(PLL_Init), &(micros_handle), 80);  // Init the systick
 }
 
 /**
