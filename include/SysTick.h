@@ -29,7 +29,7 @@
 #include "tm4c123gh6pm.h"
 #include "PLL.h"
 
-void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t reload);
+void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t reload, uint32_t priority);
 
 // Initialize SysTick with busy wait running at bus clock.
 void SysTick_Init(void);

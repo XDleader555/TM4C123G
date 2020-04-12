@@ -37,8 +37,9 @@ void micros_handle(void) {
  * @param pllinit PLL Init handler
  * @param handler systick overflow handler
  * @param reload  systick overflow count
+ * @param priority interrupt priority
  */
-void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t reload) {
+void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t reload, uint32_t priority) {
   // Init the PLL if requested
   if(pllinit != NULL)
     (*pllinit)();
@@ -50,7 +51,8 @@ void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t 
   NVIC_ST_CTRL_R = 0x00;						// disable systick during setup
   NVIC_ST_RELOAD_R = reload - 1;    		// count 80 ticks, or 1 us, dont forget we're indexed at zero
   NVIC_ST_CURRENT_R = 0;            // Set to zero so we start at the max value
-  NVIC_SYS_PRI3_R = NVIC_SYS_PRI3_R & 0X00FFFFFF;  // Interrupt vector priority 0
+  NVIC_SYS_PRI3_R &= ~(((uint32_t) (0x00000007)) << 29);          // clear priority
+  NVIC_SYS_PRI3_R |= (priority & 0x00000007) << 29; // Set priority
   NVIC_ST_CTRL_R = NVIC_ST_CTRL_ENABLE + NVIC_ST_CTRL_CLK_SRC + NVIC_ST_CTRL_INTEN;  // Use system clock
 }
 
@@ -60,7 +62,7 @@ void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t 
  */
 void SysTick_Init(void){
 	timer0_micros = 0;								                // Clear our millis timer
-  SysTick_Init_Custom(&(PLL_Init), &(micros_handle), 80);  // Init the systick
+  SysTick_Init_Custom(&(PLL_Init), &(micros_handle), 80, 0);  // Init the systick
 }
 
 /**

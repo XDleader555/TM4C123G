@@ -83,22 +83,100 @@ void pinMode(uint8_t pin, uint8_t mode) {
   setbit(portData(port, P_DEN), pin_mask);    // enable digital pins PF4-PF0
 }
 
+// 
+typedef void (*GPIOPort_ISR)(void);
+GPIOPort_ISR GPIOPortA_ISR[8];
+GPIOPort_ISR GPIOPortB_ISR[8];
+GPIOPort_ISR GPIOPortC_ISR[8];
+GPIOPort_ISR GPIOPortD_ISR[8];
+GPIOPort_ISR GPIOPortE_ISR[6];
+GPIOPort_ISR GPIOPortF_ISR[5];
+
+GPIOPort_ISR *GPIOPortISR_List[] = {
+    GPIOPortA_ISR,
+    GPIOPortB_ISR,
+    GPIOPortC_ISR,
+    GPIOPortD_ISR,
+    GPIOPortE_ISR,
+    GPIOPortF_ISR
+};
+
+uint8_t GPIOPort_INT_NUM[] = {
+  0,  // GPIO Port A
+  1,  // GPIO Port B
+  2,  // GPIO Port C
+  3,  // GPIO Port D
+  4,  // GPIO Port E
+  30  // GPIO Port F
+};
+
+volatile unsigned long * GPIOPort_INT_PRI[] = {
+    &NVIC_PRI0_R,
+    &NVIC_PRI0_R,
+    &NVIC_PRI0_R,
+    &NVIC_PRI0_R,
+    &NVIC_PRI1_R,
+    &NVIC_PRI7_R
+};
+
+uint8_t GPIOPort_INT_PRI_OFFSET[] = {
+    5,
+    13,
+    21,
+    29,
+    5,
+    21
+};
+
 /**
  * Setup a pin for interrupts
+ * RISING - a change from LOW TO HIGH generates an interrupt
+ * FALLING - a change from HIGH to LOW generatesn an interrupt
+ * CHANGE - both RISING and FALLING
+ * LOW - an interrupt is triggered whenever the pin is LOW
+ * HIGH - an interrupt is triggered whenever the pin is HIGH
  */
-void attachInterrupt(uint8_t pin, uint8_t mode) {
+void attachInterrupt(uint8_t pin, void (*ISR)(void), uint8_t mode, uint32_t priority) {
   volatile unsigned long * port = ports[pin / 10];
 	//uint8_t port_mask = (((uint8_t) 1) << (pin / 10));
   uint8_t pin_mask = (((uint8_t) 1) << (pin % 10));
+
+  clrbit(portData(port, P_IM), pin_mask);  // Disable Interrupts during setup
+  
+  (GPIOPortISR_List[pin / 10])[pin % 10] = ISR; // Assign the ISR
 
   // Setup trigger
   if(mode == RISING) {
     clrbit(portData(port, P_IS), pin_mask);   // Interrupt Sense 0=edge-sensitive, 1=level-sensitive
     clrbit(portData(port, P_IBE), pin_mask);  // 1=Both edges, 0=Interrupt Event
     setbit(portData(port, P_IEV), pin_mask);  // Interrupt Event (1=Rising, 0=Falling)
+  } else if(mode == FALLING) {
+    clrbit(portData(port, P_IS), pin_mask);   // Interrupt Sense 0=edge-sensitive, 1=level-sensitive
+    clrbit(portData(port, P_IBE), pin_mask);  // 1=Both edges, 0=Interrupt Event
+    clrbit(portData(port, P_IEV), pin_mask);  // Interrupt Event (1=Rising, 0=Falling)
+  } else if(mode == CHANGE) {
+    clrbit(portData(port, P_IS), pin_mask);   // Interrupt Sense 0=edge-sensitive, 1=level-sensitive
+    setbit(portData(port, P_IBE), pin_mask);  // 1=Both edges, 0=GPIOIEV
+  } else if(mode == LOW) {
+    setbit(portData(port, P_IS), pin_mask);   // Interrupt Sense 0=edge-sensitive, 1=level-sensitive
+    clrbit(portData(port, P_IBE), pin_mask);  // 1=Both edges, 0=Interrupt Event
+    clrbit(portData(port, P_IEV), pin_mask);  // Interrupt Event (1=HIGH, 0=LOW)
+  } else if(mode == HIGH) {
+    setbit(portData(port, P_IS), pin_mask);   // Interrupt Sense 0=edge-sensitive, 1=level-sensitive
+    clrbit(portData(port, P_IBE), pin_mask);  // 1=Both edges, 0=Interrupt Event
+    setbit(portData(port, P_IEV), pin_mask);  // Interrupt Event (1=HIGH, 0=LOW)
   }
+
+  setbit(portData(port, P_RIS), pin_mask);  // Reset Raw Interrupt Status Flag
   setbit(portData(port, P_ICR), pin_mask);  // Reset Interrupt Flag
   setbit(portData(port, P_IM), pin_mask);  // Enable Interrupt
+
+  // Find NVIC PRI from Page 152
+	(*(GPIOPort_INT_PRI[pin/10])) &= ~(0x00000007 << GPIOPort_INT_PRI_OFFSET[pin/10]); // clear priority
+  (*(GPIOPort_INT_PRI[pin/10])) |= ((priority & 0x00000007) << GPIOPort_INT_PRI_OFFSET[pin/10]); // write priority
+
+  // Find interrupt Number from Page 104
+  NVIC_EN0_R |= (0x01 << GPIOPort_INT_NUM[pin/10]); // Enable the interrupt
 }
 
 // Set a pin to low or high
@@ -123,6 +201,49 @@ uint8_t digitalRead(uint8_t pin) {
   }
   
   return LOW;
+}
+
+/**
+ * GPIO Handlers
+ * Automatically handle the GPIO port and allow Interrupt Service Routines
+ * for each pins
+ * 
+ * ToDo: Perhaps make these __attribute__((weak))?
+ */
+void GPIOPort_Handler(uint8_t portnum, uint8_t portsize) {
+  volatile unsigned long * port = ports[portnum];
+  uint8_t isr;
+
+  for(isr = 0; isr < portsize; isr ++)
+    if((GPIOPortISR_List[portnum])[isr] != NULL)
+      (*((GPIOPortISR_List[portnum])[isr]))();
+
+  // Cleared after to allow for interrupt reason
+  portData(port, P_ICR) = 0xFF;
+}
+
+void GPIOPortA_Handler(void) {
+  GPIOPort_Handler(0, 8);
+}
+
+void GPIOPortB_Handler(void) {
+  GPIOPort_Handler(1, 8);
+}
+
+void GPIOPortC_Handler(void) {
+  GPIOPort_Handler(2, 8);
+}
+
+void GPIOPortD_Handler(void) {
+  GPIOPort_Handler(3, 8);
+}
+
+void GPIOPortE_Handler(void) {
+  GPIOPort_Handler(4, 6);
+}
+
+void GPIOPortF_Handler(void) {
+  GPIOPort_Handler(5, 5);
 }
 
 #endif /* TM4C123G_H */
