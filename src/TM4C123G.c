@@ -145,8 +145,9 @@ void GPIOPort_Handler(uint8_t portnum, uint8_t portsize) {
   uint8_t isr;
 
   for(isr = 0; isr < portsize; isr ++)
-    if((GPIOPortISR_List[portnum])[isr] != NULL)
-      (*((GPIOPortISR_List[portnum])[isr]))();
+    if((portData(port, P_MIS) >> isr)&0x1 == 1)
+      if((GPIOPortISR_List[portnum])[isr] != NULL)
+        (*((GPIOPortISR_List[portnum])[isr]))();
 
   // Cleared after to allow for interrupt reason
   portData(port, P_ICR) = 0xFF;
