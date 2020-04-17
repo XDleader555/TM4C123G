@@ -25,6 +25,8 @@
 
 #include "tm4c123gh6pm.h"
 
+extern volatile unsigned long * ports[];
+
 // Arbitray numbers, the first being the port, and the second being the gpio
 #define PA0 (00)
 #define PA1 (01)
@@ -74,16 +76,6 @@
 #define PF2 (52)
 #define PF3 (53)
 #define PF4 (54)
-
-// Port offsets
-volatile unsigned long * ports[] = {
-    GPIO_PORTA_DATA_BITS_R,
-    GPIO_PORTB_DATA_BITS_R,
-    GPIO_PORTC_DATA_BITS_R,
-    GPIO_PORTD_DATA_BITS_R,
-    GPIO_PORTE_DATA_BITS_R,
-    GPIO_PORTF_DATA_BITS_R
-};
 
 // Port data offsets
 #define P_DATA      ((unsigned long) 0x3FC)
