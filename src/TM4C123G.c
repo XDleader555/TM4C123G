@@ -2,6 +2,17 @@
 
 volatile unsigned long clockDelay;
 
+int main(void){
+	// Initialize systick for use with millis()
+	SysTick_Init();
+	
+	setup();
+	
+	while(1){
+		loop();
+	}
+}
+
 GPIOPort_ISR GPIOPortA_ISR[8];
 GPIOPort_ISR GPIOPortB_ISR[8];
 GPIOPort_ISR GPIOPortC_ISR[8];

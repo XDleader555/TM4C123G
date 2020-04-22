@@ -47,10 +47,17 @@
 #define FALLING 3
 #define CHANGE 4
 
+// Setup function gets called first
+extern void setup(void);
+
+// loop function gets called from a while loop in main
+extern void loop(void);
+
 // Cortex M4 Assembly LDR PC is 5 cycles. Check with the professor?
 // 2-2-20 2x LDR Rx,[PC,#imm] (5 or 6), 1x LDR Rx,[Rx,#imm] (3), 1x STR Rx,[Ry,#imm] (1)
 // This operation takes at least 9 cycles
 typedef void (*GPIOPort_ISR)(void);
+
 
 // Sets up a gpio pin. This is an unprotected function because I'm honestly lazy.
 // ToDo: Proper data bits protections
