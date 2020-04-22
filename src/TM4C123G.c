@@ -134,6 +134,8 @@ void attachInterrupt(uint8_t pin, void (*ISR)(void), uint8_t mode, uint32_t prio
 void digitalWrite(uint8_t pin, uint8_t data) {
   volatile unsigned long * port = ports[pin / 10];
   uint8_t pin_mask = (((uint8_t) 1) << (pin % 10));
+	
+	data = data & 0x01; // mask data for data inversions
 
   if(data) {
     setbit(portData(port, P_DATA), pin_mask);
