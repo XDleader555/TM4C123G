@@ -71,12 +71,14 @@ void pinMode(uint8_t pin, uint8_t mode) {
   clrbit(portData(port, P_PUR), pin_mask);    // clear pullup bit
   clrbit(portData(port, P_PDR), pin_mask);    // clear pulldown bit
 
-	if(mode == INPUT_PULLUP) {
+	if(mode == INPUT) {
+		clrbit(portData(port, P_DIR), pin_mask);  // Set Direction as input
+	} else if(mode == INPUT_PULLUP) {
 		clrbit(portData(port, P_DIR), pin_mask);  // Set Direction as input
 		setbit(portData(port, P_PUR), pin_mask);  // enable pullup resistor
 	} else if(mode == INPUT_PULLDOWN) {
 		clrbit(portData(port, P_DIR), pin_mask);  // Set Direction as input
-		setbit(portData(port, P_PDR), pin_mask);
+		setbit(portData(port, P_PDR), pin_mask);	// enable pulldown resistor
 	} else {
     setbit(portData(port, P_DIR), pin_mask);  // Set Direction as output
   }
