@@ -23,22 +23,8 @@
 
 #include "SysTick.h"
 
-// Page 710 of the datasheet states 80MHz clock (12.5 ns)
-volatile unsigned long timer0_micros;
 void (*_SysTick_Handler)(void);
 
-void micros_handle(void) {
-  timer0_micros ++;
-}
-
-/**
- * Friendly systick initialization function. Expanded to allow configuration
- * of pll, handler, and reload value
- * @param pllinit PLL Init handler
- * @param handler systick overflow handler
- * @param reload  systick overflow count
- * @param priority interrupt priority
- */
 void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t reload, uint32_t priority) {
   // Init the PLL if requested
   if(pllinit != NULL)
@@ -57,44 +43,9 @@ void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t 
 }
 
 /**
- * Automatically setup systick for millis() and micros() usage
- * Set the PLL to 80Mhz and reload every 80 ticks
- */
-void SysTick_Init(void){
-	timer0_micros = 0;								                // Clear our millis timer
-  SysTick_Init_Custom(&(PLL_Init), &(micros_handle), 80, 0);  // Init the systick
-}
-
-/**
  * Call the systick handler helper function which should always be set by
  * systick init. We avoid the null pointer check to reduce overhead
  */
 void SysTick_Handler(void){
   (*_SysTick_Handler)();
-}
-
-unsigned long millis(void) {
-  return timer0_micros / 1000;
-}
-
-unsigned long micros(void) {
-  return timer0_micros;
-}
-
-void delay(unsigned long ms) {
-  unsigned long startTime = millis();
-
-  while(millis() - startTime <= ms) {} 
-}
-
-void delayMicros(uint16_t us) {
-	unsigned long startTime;
-  // return immediately if zero
-  if(!us)
-    return; 
-
-  startTime = micros();
-  
-  // ToDo: Finish this function, figureout how long bitshifting takes
-  while(micros() - startTime > us) {}
 }

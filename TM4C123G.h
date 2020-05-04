@@ -26,7 +26,8 @@
 #include <stddef.h>
 #include "tm4c123gh6pm.h"
 #include "SysTick.h"
-#include "pins.h"	
+#include "pins.h"
+#include "time.h"
 
 // These are 8 bit functions
 #define clrbit(data, mask) (data &= ~mask)

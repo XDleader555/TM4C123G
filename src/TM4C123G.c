@@ -3,8 +3,11 @@
 volatile unsigned long clockDelay;
 
 int main(void){
+  // Initialize timer0 for use with millis()
+  Timer_Time_Init(0);
+
 	// Initialize systick for use with millis()
-	SysTick_Init();
+	//SysTick_Time_Init();
 	
 	setup();
 	

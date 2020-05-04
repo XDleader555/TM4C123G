@@ -27,21 +27,17 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "tm4c123gh6pm.h"
-#include "PLL.h"
 
+/**
+ * Friendly systick initialization function. Expanded to allow configuration
+ * of pll, handler, and reload value
+ * @param pllinit PLL Init handler
+ * @param handler systick overflow handler
+ * @param reload  systick overflow count
+ * @param priority interrupt priority
+ */
 void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t reload, uint32_t priority);
 
-// Initialize SysTick with busy wait running at bus clock.
-void SysTick_Init(void);
-
 void SysTick_Handler(void);
-
-unsigned long millis(void);
-
-unsigned long micros(void);
-
-void delay(unsigned long ms);
-
-void delayMicros(uint16_t us);
 
 #endif /* SYSTICK_H */
