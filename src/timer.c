@@ -3,8 +3,6 @@
 void (*_Timer0A_Handler)(void);
 
 void Timer_Init_Custom(uint8_t timer, void (*handler)(void), uint32_t reload) {
-  uint32_t clockDelay;
-
   // Assign internal handler for when the timer overflows
   _Timer0A_Handler = handler;
 

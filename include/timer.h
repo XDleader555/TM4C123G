@@ -33,6 +33,8 @@
 #include <stddef.h>
 #include "tm4c123gh6pm.h"
 
+extern volatile unsigned long clockDelay;
+
 /**
  * Friendly timer initialization function.
  * Expanded to allow configuration of handler and reload value
