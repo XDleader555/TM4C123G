@@ -35,7 +35,7 @@ void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t 
 
   // Initialize the systick
   NVIC_ST_CTRL_R = 0x00;						// disable systick during setup
-  NVIC_ST_RELOAD_R = reload - 1;    		// count 80 ticks, or 1 us, dont forget we're indexed at zero
+  NVIC_ST_RELOAD_R = reload - 1;    // set reload value, remember this is indexed at zero
   NVIC_ST_CURRENT_R = 0;            // Set to zero so we start at the max value
   NVIC_SYS_PRI3_R &= ~(((uint32_t) (0x00000007)) << 29);          // clear priority
   NVIC_SYS_PRI3_R |= (priority & 0x00000007) << 29; // Set priority

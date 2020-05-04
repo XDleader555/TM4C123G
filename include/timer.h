@@ -26,48 +26,22 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef TIME_H
-#define TIME_H
+#ifndef TIMER_H
+#define TIMER_H
 
 #include <stdint.h>
 #include <stddef.h>
 #include "tm4c123gh6pm.h"
-#include "PLL.h"
-#include "SysTick.h"
-#include "timer.h"
 
 /**
- * Setup systick for millis() and micros() usage
- * Set the PLL to 80Mhz and reload every 80 ticks
+ * Friendly timer initialization function.
+ * Expanded to allow configuration of handler and reload value
+ * @param timer timer to initialize
+ * @param handler systick overflow handler
+ * @param reload  systick overflow count
  */
-void SysTick_Time_Init(void);
+void Timer_Init_Custom(uint8_t timer, void (*handler)(void), uint32_t reload);
 
-/**
- * Setup a timer for use with millis() and micros()
- * @param timer timer number to initialize
- */
-void Timer_Time_Init(uint8_t timer);
+void Timer0A_Handler(void);
 
-/**
- * Return the time since initialization in milliseconds
- */
-unsigned long millis(void);
-
-/**
- * Returns the time since initialization in microseconds
- */
-unsigned long micros(void);
-
-/**
- * No operation for the specified number of milliseconds
- * @param ms number of milliseconds to delay
- */
-void delay(unsigned long ms);
-
-/**
- * No operation for the specified number of microseconds
- * @param us number of microseconds to delay
- */
-void delayMicros(uint16_t us);
-
-#endif /* TIME_H */
+#endif /* TIMER_H */

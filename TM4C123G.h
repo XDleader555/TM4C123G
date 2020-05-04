@@ -25,7 +25,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "tm4c123gh6pm.h"
-#include "SysTick.h"
 #include "pins.h"
 #include "time.h"
 

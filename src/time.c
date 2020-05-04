@@ -12,11 +12,10 @@ void SysTick_Time_Init(void){
   SysTick_Init_Custom(&(PLL_Init), &(micros_handle), 80, 0);  // Init the systick
 }
 
+// TODO: Add support for other timers and push the handler into its own file
 void Timer_Time_Init(uint8_t timer) {
   timer0_micros = 0;
-
-  
-
+  Timer_Init_Custom(timer, &(micros_handle), 80);
 }
 
 unsigned long millis(void) {
