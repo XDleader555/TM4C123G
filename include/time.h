@@ -36,6 +36,9 @@
 #include "SysTick.h"
 #include "timer.h"
 
+#define INIT_TIMER		0
+#define INIT_SYSTICK	1
+
 /**
  * Setup systick for millis() and micros() usage
  * Set the PLL to 80Mhz and reload every 80 ticks
