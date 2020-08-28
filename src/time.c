@@ -1,8 +1,8 @@
 #include "time.h"
 
 // Page 710 of the datasheet states 80MHz clock (12.5 ns)
-volatile unsigned long timer0_micros;
-uint8_t timer_init;	// keep track of how the timer is initialized
+static volatile unsigned long timer0_micros;
+static uint8_t timer_init;	// keep track of how the timer is initialized
 
 void micros_handle(void) {
   timer0_micros ++;

@@ -1,8 +1,9 @@
 #include "timer.h"
 
-void (*_Timer0A_Handler)(void);
+static void (*_Timer0A_Handler)(void);
 
 // http://shukra.cedt.iisc.ernet.in/edwiki/EmSys:TM4C123_Timer_Programming
+// TODO: implement which timer will be used
 void Timer_Init_Custom(uint8_t timer, void (*handler)(void), uint32_t reload) {
   // Assign internal handler for when the timer overflows
   _Timer0A_Handler = handler;

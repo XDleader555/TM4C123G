@@ -73,4 +73,9 @@ void delay(unsigned long ms);
  */
 void delayMicros(uint16_t us);
 
+/**
+ * Automatic handler for increasing the micros count
+ */
+void micros_handle(void);
+
 #endif /* TIME_H */

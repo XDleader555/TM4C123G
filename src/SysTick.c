@@ -23,7 +23,7 @@
 
 #include "SysTick.h"
 
-void (*_SysTick_Handler)(void);
+static void (*_SysTick_Handler)(void);
 
 void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t reload, uint32_t priority) {
   // Init the PLL if requested

@@ -2,14 +2,14 @@
 
 volatile unsigned long clockDelay;
 
-GPIOPort_ISR GPIOPortA_ISR[8];
-GPIOPort_ISR GPIOPortB_ISR[8];
-GPIOPort_ISR GPIOPortC_ISR[8];
-GPIOPort_ISR GPIOPortD_ISR[8];
-GPIOPort_ISR GPIOPortE_ISR[6];
-GPIOPort_ISR GPIOPortF_ISR[5];
+static GPIOPort_ISR GPIOPortA_ISR[8];
+static GPIOPort_ISR GPIOPortB_ISR[8];
+static GPIOPort_ISR GPIOPortC_ISR[8];
+static GPIOPort_ISR GPIOPortD_ISR[8];
+static GPIOPort_ISR GPIOPortE_ISR[6];
+static GPIOPort_ISR GPIOPortF_ISR[5];
 
-GPIOPort_ISR *GPIOPortISR_List[] = {
+static GPIOPort_ISR *GPIOPortISR_List[] = {
     GPIOPortA_ISR,
     GPIOPortB_ISR,
     GPIOPortC_ISR,
@@ -18,7 +18,7 @@ GPIOPort_ISR *GPIOPortISR_List[] = {
     GPIOPortF_ISR
 };
 
-uint8_t GPIOPort_INT_NUM[] = {
+static uint8_t GPIOPort_INT_NUM[] = {
   0,  // GPIO Port A
   1,  // GPIO Port B
   2,  // GPIO Port C
@@ -27,7 +27,7 @@ uint8_t GPIOPort_INT_NUM[] = {
   30  // GPIO Port F
 };
 
-volatile unsigned long * GPIOPort_INT_PRI[] = {
+static volatile unsigned long * GPIOPort_INT_PRI[] = {
     &NVIC_PRI0_R,
     &NVIC_PRI0_R,
     &NVIC_PRI0_R,
@@ -36,7 +36,7 @@ volatile unsigned long * GPIOPort_INT_PRI[] = {
     &NVIC_PRI7_R
 };
 
-uint8_t GPIOPort_INT_PRI_OFFSET[] = {
+static uint8_t GPIOPort_INT_PRI_OFFSET[] = {
     5,
     13,
     21,
@@ -47,8 +47,8 @@ uint8_t GPIOPort_INT_PRI_OFFSET[] = {
 
 void pinMode(uint8_t pin, uint8_t mode) {
   volatile unsigned long * port = ports[pin / 10];
-	uint8_t port_mask = (((uint8_t) 1) << (pin / 10));
-  uint8_t pin_mask = (((uint8_t) 1) << (pin % 10));
+	uint8_t port_mask = (uint8_t) (((uint8_t) 1) << (pin / 10));
+  uint8_t pin_mask = (uint8_t) (((uint8_t) 1) << (pin % 10));
 
   SYSCTL_RCGC2_R |= ((uint64_t) port_mask);   // gpio clock
   clockDelay = SYSCTL_RCGC2_R;                // delay by assigning a register
@@ -79,7 +79,7 @@ void pinMode(uint8_t pin, uint8_t mode) {
 void attachInterrupt(uint8_t pin, void (*ISR)(void), uint8_t mode, uint32_t priority) {
   volatile unsigned long * port = ports[pin / 10];
 	//uint8_t port_mask = (((uint8_t) 1) << (pin / 10));
-  uint8_t pin_mask = (((uint8_t) 1) << (pin % 10));
+  uint8_t pin_mask = (uint8_t) (((uint8_t) 1) << (pin % 10));
 
   clrbit(portData(port, P_IM), pin_mask);  // Disable Interrupts during setup
   
@@ -112,7 +112,7 @@ void attachInterrupt(uint8_t pin, void (*ISR)(void), uint8_t mode, uint32_t prio
   setbit(portData(port, P_IM), pin_mask);  // Enable Interrupt
 
   // Find NVIC PRI from Page 152
-	(*(GPIOPort_INT_PRI[pin/10])) &= ~(0x00000007 << GPIOPort_INT_PRI_OFFSET[pin/10]); // clear priority
+	(*(GPIOPort_INT_PRI[pin/10])) &= (unsigned long) ~(0x00000007 << GPIOPort_INT_PRI_OFFSET[pin/10]); // clear priority
   (*(GPIOPort_INT_PRI[pin/10])) |= ((priority & 0x00000007) << GPIOPort_INT_PRI_OFFSET[pin/10]); // write priority
 
   // Find interrupt Number from Page 104
@@ -122,7 +122,7 @@ void attachInterrupt(uint8_t pin, void (*ISR)(void), uint8_t mode, uint32_t prio
 // Set a pin to low or high
 void digitalWrite(uint8_t pin, uint8_t data) {
   volatile unsigned long * port = ports[pin / 10];
-  uint8_t pin_mask = (((uint8_t) 1) << (pin % 10));
+  uint8_t pin_mask = (uint8_t) (((uint8_t) 1) << (pin % 10));
 	
 	data = data & 0x01; // mask data for data inversions
 
@@ -135,7 +135,7 @@ void digitalWrite(uint8_t pin, uint8_t data) {
 
 uint8_t digitalRead(uint8_t pin) {
   volatile unsigned long * port = ports[pin / 10];
-  uint8_t pin_mask = (((uint8_t) 1) << (pin % 10));
+  uint8_t pin_mask = (uint8_t) (((uint8_t) 1) << (pin % 10));
 
   if(portData(port, P_DATA) & pin_mask) {
     return HIGH;
