@@ -31,13 +31,24 @@
 /**
  * Friendly systick initialization function. Expanded to allow configuration
  * of pll, handler, and reload value
- * @param pllinit PLL Init handler
- * @param handler systick overflow handler
- * @param reload  systick overflow count
- * @param priority interrupt priority
+ * @param pllinit 	PLL Init handler
+ * @param handler 	systick overflow handler
+ * @param reload  	systick overflow count
+ * @param priority	interrupt priority, higher value takes precedence
  */
 void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t reload, uint32_t priority);
 
+/**
+ * Adjusts the reload value of the systick without re-initilizing
+ * also clears the current value in case it's called in an interrupt
+ * @param reload the value to load into systick
+ */
+void Systick_Set_Reload(uint32_t reload);
+
+/**
+ * Call the systick handler helper function which should always be set by
+ * systick init. We avoid the null pointer check to reduce overhead
+ */
 void SysTick_Handler(void);
 
 #endif /* SYSTICK_H */

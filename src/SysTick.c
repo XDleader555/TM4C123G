@@ -42,10 +42,13 @@ void SysTick_Init_Custom(void (*pllinit)(void), void (*handler)(void), uint32_t 
   NVIC_ST_CTRL_R = NVIC_ST_CTRL_ENABLE + NVIC_ST_CTRL_CLK_SRC + NVIC_ST_CTRL_INTEN;  // Use system clock
 }
 
-/**
- * Call the systick handler helper function which should always be set by
- * systick init. We avoid the null pointer check to reduce overhead
- */
+void Systick_Set_Reload(uint32_t reload) {
+	NVIC_ST_CTRL_R &= (uint32_t) ~NVIC_ST_CTRL_ENABLE;
+	NVIC_ST_RELOAD_R = reload - 1;
+	NVIC_ST_CURRENT_R = 0;
+	NVIC_ST_CTRL_R |= NVIC_ST_CTRL_ENABLE;
+}
+
 void SysTick_Handler(void){
   (*_SysTick_Handler)();
 }
