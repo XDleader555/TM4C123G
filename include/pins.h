@@ -25,7 +25,7 @@
 
 #include "tm4c123gh6pm.h"
 
-extern volatile unsigned long * ports[];
+extern unsigned long * ports[];
 
 // Arbitray numbers, the first being the port, and the second being the gpio
 #define PA0 (00)
