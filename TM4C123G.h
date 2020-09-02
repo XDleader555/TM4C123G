@@ -21,9 +21,9 @@
 #ifndef TM4C123G_H
 #define TM4C123G_H
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
+#include <stdint.h>				// I don't trust keil's data types
+#include <stdbool.h>			// yeah it's technically just a char
+#include <stddef.h>				// needed for NULL
 #include "tm4c123gh6pm.h"
 #include "pins.h"
 #include "time.h"
@@ -35,14 +35,17 @@
 // port data macro for functions
 #define portData(port_offset, data_offset) (*(port_offset + (data_offset / sizeof(port_offset))))
 
+// gpio directions
 #define OUTPUT 0
 #define INPUT 1
 #define INPUT_PULLUP 2
 #define INPUT_PULLDOWN 3
 
+// gpio data values
 #define LOW 0
 #define HIGH 1
 
+// gpio trigger modes
 #define RISING 2
 #define FALLING 3
 #define CHANGE 4
@@ -56,25 +59,40 @@ extern void WaitForInterrupt(void);  // low power mode
 // This operation takes at least 9 cycles
 typedef void (*GPIOPort_ISR)(void);
 
-
-// Sets up a gpio pin. This is an unprotected function because I'm honestly lazy.
-// ToDo: Proper data bits protections
+/**
+ * Sets up a gpio pin. This is an unprotected function because I'm honestly lazy.
+ * ToDo: Proper data bits protections
+ * @param pin 	gpio pin to setup, must use friendly definition (ex PF4)
+ * @param mode	gpio direction (OUTPUT, INPUT, INPUT_PULLUP, INPUT_PULLDOWN)
+ */
 void pinMode(uint8_t pin, uint8_t mode);
 
 /**
- * Setup a pin for interrupts
+ * Setup a pin for interrupts. Available modes:
  * RISING - a change from LOW TO HIGH generates an interrupt
  * FALLING - a change from HIGH to LOW generatesn an interrupt
  * CHANGE - both RISING and FALLING
  * LOW - an interrupt is triggered whenever the pin is LOW
  * HIGH - an interrupt is triggered whenever the pin is HIGH
+ * @param pin				which pin to attach to
+ * @param ISR				function to call when interrupted
+ * @param mode			interrupt trigger mode
+ * @param priority	interrupt priority, higher value takes precedence
  */
 void attachInterrupt(uint8_t pin, void (*ISR)(void), uint8_t mode, uint32_t priority);
 
-// Set a pin to low or high
+/**
+ * Set a pin to low or high
+ * @param pin		gpio pin to write to, must use friendly definition (ex PF4)
+ * @param data	data to write (HIGH or LOW)
+ */
 void digitalWrite(uint8_t pin, uint8_t data);
 
-// Read a pin, returns low or high
+/**
+ * Reads the value of a pin, triggers above a certain voltage (somewhere around 3v?)
+ * @param pin		gpio pin to read, must use friendly definition (ex PF4)
+ * @return			returns HIGH or LOW depending on pin voltage
+ */
 uint8_t digitalRead(uint8_t pin);
 
 /**
