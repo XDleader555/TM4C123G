@@ -107,7 +107,7 @@ void attachInterrupt(uint8_t pin, void (*ISR)(void), uint8_t mode, uint32_t prio
     setbit(portData(port, P_IEV), pin_mask);  // Interrupt Event (1=HIGH, 0=LOW)
   }
 
-  setbit(portData(port, P_RIS), pin_mask);  // Reset Raw Interrupt Status Flag
+  //setbit(portData(port, P_RIS), pin_mask);  // Reset Raw Interrupt Status Flag
   setbit(portData(port, P_ICR), pin_mask);  // Reset Interrupt Flag
   setbit(portData(port, P_IM), pin_mask);  // Enable Interrupt
 
