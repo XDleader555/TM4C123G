@@ -27,6 +27,7 @@
 #include <stdbool.h>			// yeah it's technically just a char
 #include <stddef.h>				// needed for NULL
 #include "tm4c123gh6pm.h"
+#include "util.h"
 #include "pins.h"
 
 static volatile unsigned long clockDelay;

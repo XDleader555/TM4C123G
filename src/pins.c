@@ -11,13 +11,23 @@ volatile unsigned long * port_addrs[] = {
 };
 
 // GPIO pin to generator
-volatile uint8_t pin_to_pwm_gen[] = {
+volatile uint8_t pin_to_pwm[] = {
     NOPWM,  NOPWM,  NOPWM,  NOPWM,  NOPWM,  NOPWM,  M1PWM2, M1PWM3, // PA
     NOPWM,  NOPWM,  NOPWM,  NOPWM,  M0PWM2, M0PWM3, M0PWM0, M0PWM1, // PB
     NOPWM,  NOPWM,  NOPWM,  NOPWM,  M0PWM6, M0PWM7, NOPWM,  NOPWM,  // PC
     M1PWM0, M1PWM1, NOPWM,  NOPWM,  NOPWM,  NOPWM,  NOPWM,  NOPWM,  // PD
     NOPWM,  NOPWM,  NOPWM,  NOPWM,  M0PWM4, M0PWM5,                 // PE
     NOPWM,  NOPWM,  M1PWM6, M1PWM7, NOPWM                           // PF
+};
+
+volatile uint8_t pwm_to_pwmgen[] = {
+    0, 0, 1, 1, 2, 2, 3, 3,     // Module 0
+    0, 0, 1, 1, 2, 2, 3, 3      // Module 1
+};
+
+volatile uint8_t pwm_to_enable_bit[] = {
+    0, 1, 2, 3, 4, 5, 6, 7,     // Module 0
+    0, 1, 2, 3, 4, 5, 6, 7      // Module 1
 };
 
 volatile uint8_t pin_to_port[] = {
@@ -47,6 +57,7 @@ volatile uint8_t pin_to_pin_mask[] = {
     0x01, 0x02, 0x04, 0x08, 0x10                    // PF
 };
 
-volatile uint8_t port_to_port_mask[] = {
-    0x01, 0x02, 0x04, 0x08, 0x10, 0x20
+volatile uint8_t _8bit_mask[] = {
+    0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80
 };
+

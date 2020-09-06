@@ -23,38 +23,41 @@
 #ifndef PINS_H
 #define PINS_H
 
-#include "tm4c123gh6pm.h"
 #include <stdint.h>
 #include <stddef.h>
+#include "tm4c123gh6pm.h"
+#include "util.h"
 
-#define pwmgen_to_pwmmod(pwm_gen) ((pwm_mod < 9) ? 0 : 1)
-#define pwmgen_to_pwmmodaddr(pwm_gen) ((pwm_mod < 9) ? &PWM0_0_CTL_R : &PWM1_0_CTL_R)
+#define pwm_to_pwmmod(pwm) ((pwm < 8) ? 0 : 1)
+#define pwm_to_pwmmodaddr(pwm) ((pwm < 8) ? &PWM0_0_CTL_R : &PWM1_0_CTL_R)
 
 extern volatile unsigned long * port_addrs[];
-extern volatile uint8_t pin_to_pwm_gen[];
+extern volatile uint8_t pin_to_pwm[];
+extern volatile uint8_t pwm_to_pwmgen[];
+extern volatile uint8_t pwm_to_enable_bit[];
 extern volatile uint8_t pin_to_port[];
 extern volatile uint8_t pin_to_pin_mask[];
 extern volatile uint8_t pin_to_port_bit[];
-extern volatile uint8_t port_to_port_mask[];
+extern volatile uint8_t _8bit_mask[];
 
-// PWM modulators
-#define NOPWM   0
-#define M0PWM0  1
-#define M0PWM1  2
-#define M0PWM2  3
-#define M0PWM3  4
-#define M0PWM4  5
-#define M0PWM5  6
-#define M0PWM6  7
-#define M0PWM7  8
-#define M1PWM0  9
-#define M1PWM1  10
-#define M1PWM2  11
-#define M1PWM3  12
-#define M1PWM4  13
-#define M1PWM5  14
-#define M1PWM6  15
-#define M1PWM7  16
+// pwm indexes
+#define NOPWM   255
+#define M0PWM0  0
+#define M0PWM1  1
+#define M0PWM2  2
+#define M0PWM3  3
+#define M0PWM4  4
+#define M0PWM5  5
+#define M0PWM6  6
+#define M0PWM7  7
+#define M1PWM0  8
+#define M1PWM1  9
+#define M1PWM2  10
+#define M1PWM3  11
+#define M1PWM4  12
+#define M1PWM5  13
+#define M1PWM6  14
+#define M1PWM7  15
 
 // Ports
 #define PA 0

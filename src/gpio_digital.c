@@ -47,7 +47,7 @@ static uint8_t GPIOPort_INT_PRI_OFFSET[] = {
 
 void pinMode(uint8_t pin, uint8_t mode) {
   volatile unsigned long * port = port_addrs[pin_to_port[pin]];
-	uint8_t port_mask = port_to_port_mask[pin_to_port[pin]];
+	uint8_t port_mask = _8bit_mask[pin_to_port[pin]];
   uint8_t pin_mask = pin_to_pin_mask[pin];
 
   SYSCTL_RCGC2_R |= ((uint64_t) port_mask);   // gpio clock
@@ -56,7 +56,7 @@ void pinMode(uint8_t pin, uint8_t mode) {
   setbit(portData(port, P_CR), pin_mask);     // allow changes to pin
   clrbit(portData(port, P_AFSEL), pin_mask);  // Regular IO
 	clrbit(portData(port, P_AMSEL), pin_mask);  // Force digital instead of analog
-  clrbit(portData(port, P_PCTL), pin_mask);   // GPIO clear bit PCTL
+  portData(port, P_PCTL) &= (uint32_t) ~(0xF << (pin_to_port_bit[pin] * 4)); // clear the pin mux control
   
   clrbit(portData(port, P_PUR), pin_mask);    // clear pullup bit
   clrbit(portData(port, P_PDR), pin_mask);    // clear pulldown bit
@@ -78,7 +78,6 @@ void pinMode(uint8_t pin, uint8_t mode) {
 
 void attachInterrupt(uint8_t pin, void (*ISR)(void), uint8_t mode, uint32_t priority) {
   volatile unsigned long * port = port_addrs[pin_to_port[pin]];
-	uint8_t port_mask = port_to_port_mask[pin_to_port[pin]];
   uint8_t pin_mask = pin_to_pin_mask[pin];
 
   clrbit(portData(port, P_IM), pin_mask);  // Disable Interrupts during setup
