@@ -85,5 +85,5 @@ void analogWrite(uint8_t pin, uint16_t value) {
 
 void analogWriteFrequency(uint16_t freq) {
   // todo is this correct?
-  PWM_PERIOD = (uint32_t) (1.0/freq)/(0.0000000125);
+  PWM_PERIOD = (uint32_t) ((1.0/freq)/(0.0000000125));
 }
