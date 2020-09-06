@@ -10,9 +10,9 @@ void analogWrite(uint8_t pin, uint16_t value) {
   uint8_t pctl_shift = pin_to_port_bit[pin] * 4;
   uint8_t pwm = pin_to_pwm[pin];
   uint8_t pwm_ena = pwm_to_enable_bit[pwm];
-  uint8_t pwm_gen = pwm_to_pwmgen[pin];
+  uint8_t pwm_gen = pwm_to_pwmgen[pwm];
   uint8_t pwm_mod = pwm_to_pwmmod(pwm_gen);
-  uint32_t pwm_gen_mask = 0x00000001 << pwm_to_pwmgen[pwm];
+  uint32_t pwm_gen_mask = 0x00000001 << pwm_gen;
   value = max(min(value, PWM_RES), 0);   // Max value is 12-bit to match the ADC
 
   // Get the offset for the pwmcfg
@@ -50,7 +50,7 @@ void analogWrite(uint8_t pin, uint16_t value) {
   // setup gpio as pwm if it's not already (Check if the PWM bits have been set)
   // Stuff in here only needs to be set first time PWM is setup for this pin
   if(((portData(port, P_PCTL) >> pctl_shift) & 0x07) < 4) {
-    digitalWrite(pin, LOW); // Clear digital output
+    //digitalWrite(pin, LOW); // Clear digital output
     setbit(portData(port, P_AFSEL), pin_mask);      // alt function
     if(pwm_mod == 0) {
       portData(port, P_PCTL) |= (uint32_t) (0x4 << pctl_shift);  // write the mux control for PWM0
@@ -61,8 +61,8 @@ void analogWrite(uint8_t pin, uint16_t value) {
     SYSCTL_RCGCPWM_R |= pwm_mod ? 0x01 : 0x02;  // activate the appropriate pwm module
     SYSCTL_RCC_R |= SYSCTL_RCC_USEPWMDIV;       // use PWM divider
     SYSCTL_RCC_R &= (uint32_t) ~SYSCTL_RCC_PWMDIV_M;       // clear PWM divider field
-    SYSCTL_RCC_R += SYSCTL_RCC_PWMDIV_2;        // configure for /2 divider
-    portData(pwmcfgaddr, PWM_CTL) &= ~(pwm_gen_mask); // disable the appropriate pwm generator for setup
+    SYSCTL_RCC_R |= SYSCTL_RCC_PWMDIV_2;        // configure for /2 divider
+    portData(pwmcfgaddr, PWM_CTL) = 0; // disable the appropriate pwm generator for setup
     // low on LOAD, high on CMPA down, even enable bits use generator A
     if(pwm_ena % 2 == 0) {
       portData(pwmcfgaddr, PWM_GENA) = (PWM_0_GENB_ACTCMPBD_ONE|PWM_0_GENB_ACTLOAD_ZERO);
@@ -73,9 +73,9 @@ void analogWrite(uint8_t pin, uint16_t value) {
     portData(pwmcfgaddr, PWM_CTL) |= pwm_gen_mask;   // start the appropriate pwm timer
     // Enable PWM
     if(pwm_mod == 0) {
-      PWM0_ENABLE_R |= _8bit_mask[pwm_ena];
+      PWM0_ENABLE_R |= (uint32_t) _8bit_mask[pwm_ena];
     } else {
-      PWM1_ENABLE_R |= _8bit_mask[pwm_ena];
+      PWM1_ENABLE_R |= (uint32_t) _8bit_mask[pwm_ena];
     }
   } else {
     // Just need to reload the value

@@ -29,6 +29,7 @@
 
 #define PWM_RES             4095    // 12 bits of resolution to match ADC
 static volatile uint32_t PWM_PERIOD = 40000;   // 1000hz, with an 80Mhz PLL
+static volatile unsigned long clockDelay;
 
 // Memory offsets used to configure each PWM module
 #define PWM_CTL            ((unsigned long) 0x00)
