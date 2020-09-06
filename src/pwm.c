@@ -6,14 +6,13 @@
 void analogWrite(uint8_t pin, uint16_t value) {
   volatile unsigned long * port = port_addrs[pin_to_port[pin]];
   volatile unsigned long * pwmcfgaddr;
-  uint8_t pin_mask = pin_to_pin_mask[pin];
-  uint8_t pctl_shift = pin_to_port_bit[pin] * 4;
-  uint8_t pwm = pin_to_pwm[pin];
-  uint8_t pwm_ena = pwm_to_enable_bit[pwm];
-  uint8_t pwm_gen = pwm_to_pwmgen[pwm];
-  uint8_t pwm_mod = pwm_to_pwmmod(pwm_gen);
-  uint32_t pwm_gen_mask = 0x00000001 << pwm_gen;
-  value = max(min(value, PWM_RES), 0);   // Max value is 12-bit to match the ADC
+  uint8_t pin_mask = pin_to_pin_mask[pin];        // get the pin mask
+  uint8_t pctl_shift = pin_to_port_bit[pin] * 4;  // Get the gpio pctl shift needed to control the port mux
+  uint8_t pwm = pin_to_pwm[pin];                  // Get the pwm index
+  uint8_t pwm_ena = pwm_to_enable_bit[pwm];       // Convert the pwm index to the offset bit of the module (0 to 7)
+  uint8_t pwm_gen = pwm_to_pwmgen[pwm];           // Convert the pwm index to the pwm generator module (0 to 3)
+  uint8_t pwm_mod = pwm_to_pwmmod(pwm);       // Convert the pwm to the pwm module (0 or 1)
+  value = max(min(value, PWM_RES), 0);            // Max value is 12-bit to match the ADC
 
   // Get the offset for the pwmcfg
   pwmcfgaddr = portDataAddr(pwm_to_pwmmodaddr(pwm), PWM_CFGSIZE * pwm_gen);
@@ -58,20 +57,22 @@ void analogWrite(uint8_t pin, uint16_t value) {
       portData(port, P_PCTL) |= (uint32_t) (0x5 << pctl_shift);  // write the mux control for PWM1
     }
 
-    SYSCTL_RCGCPWM_R |= pwm_mod ? 0x01 : 0x02;  // activate the appropriate pwm module
+    SYSCTL_RCGCPWM_R |= (pwm_mod == 0) ? 0x01 : 0x02;  // activate the appropriate pwm module
     SYSCTL_RCC_R |= SYSCTL_RCC_USEPWMDIV;       // use PWM divider
     SYSCTL_RCC_R &= (uint32_t) ~SYSCTL_RCC_PWMDIV_M;       // clear PWM divider field
     SYSCTL_RCC_R |= SYSCTL_RCC_PWMDIV_2;        // configure for /2 divider
-    portData(pwmcfgaddr, PWM_CTL) = 0; // disable the appropriate pwm generator for setup
+    portData(pwmcfgaddr, PWM_CTL) &= ~(PWM_0_CTL_ENABLE); // disable the appropriate pwm generator for setup
     // low on LOAD, high on CMPA down, even enable bits use generator A
     if(pwm_ena % 2 == 0) {
-      portData(pwmcfgaddr, PWM_GENA) = (PWM_0_GENB_ACTCMPBD_ONE|PWM_0_GENB_ACTLOAD_ZERO);
+      portData(pwmcfgaddr, PWM_GENA) = (PWM_0_GENA_ACTCMPAD_ONE|PWM_0_GENA_ACTLOAD_ZERO);
+      portData(pwmcfgaddr, PWM_CMPA) = ((uint16_t) (PWM_PERIOD * (((double) value)/PWM_RES))) - 1;  // 6) count value when output rises
     } else {
-      portData(pwmcfgaddr, PWM_GENB) = (PWM_0_GENB_ACTCMPBD_ONE|PWM_0_GENB_ACTLOAD_ZERO);
+      portData(pwmcfgaddr, PWM_GENB) = (PWM_0_GENA_ACTCMPAD_ONE|PWM_0_GENA_ACTLOAD_ZERO);
+      portData(pwmcfgaddr, PWM_CMPB) = ((uint16_t) (PWM_PERIOD * (((double) value)/PWM_RES))) - 1;  // 6) count value when output rises
     }
     portData(pwmcfgaddr, PWM_LOAD) = PWM_PERIOD - 1;           // 5) cycles needed to count down to 0
-    portData(pwmcfgaddr, PWM_CTL) |= pwm_gen_mask;   // start the appropriate pwm timer
-    // Enable PWM
+    portData(pwmcfgaddr, PWM_CTL) |= PWM_0_CTL_ENABLE;         // Enable PWM
+    // Enable the pwm pin
     if(pwm_mod == 0) {
       PWM0_ENABLE_R |= (uint32_t) _8bit_mask[pwm_ena];
     } else {
@@ -79,7 +80,11 @@ void analogWrite(uint8_t pin, uint16_t value) {
     }
   } else {
     // Just need to reload the value
-    portData(pwmcfgaddr, PWM_CMPA) = ((uint16_t) (PWM_PERIOD * (((double) value)/PWM_RES))) - 1;  // 6) count value when output rises
+    if(pwm_ena % 2 == 0) {
+      portData(pwmcfgaddr, PWM_CMPA) = ((uint16_t) (PWM_PERIOD * (((double) value)/PWM_RES))) - 1;  // 6) count value when output rises
+    } else {
+      portData(pwmcfgaddr, PWM_CMPB) = ((uint16_t) (PWM_PERIOD * (((double) value)/PWM_RES))) - 1;  // 6) count value when output rises
+    }
   }
 }
 

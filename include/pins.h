@@ -28,8 +28,8 @@
 #include "tm4c123gh6pm.h"
 #include "util.h"
 
-#define pwm_to_pwmmod(pwm) ((pwm < 8) ? 0 : 1)
-#define pwm_to_pwmmodaddr(pwm) ((pwm < 8) ? &PWM0_0_CTL_R : &PWM1_0_CTL_R)
+#define pwm_to_pwmmod(x) ((x < 8) ? 0 : 1)
+#define pwm_to_pwmmodaddr(x) ((x < 8) ? &PWM0_0_CTL_R : &PWM1_0_CTL_R)
 
 extern volatile unsigned long * port_addrs[];
 extern volatile uint8_t pin_to_pwm[];
