@@ -12,6 +12,7 @@ void analogWrite(uint8_t pin, uint16_t value) {
   uint8_t pwm_ena = pwm_to_enable_bit[pwm];       // Convert the pwm index to the offset bit of the module (0 to 7)
   uint8_t pwm_gen = pwm_to_pwmgen[pwm];           // Convert the pwm index to the pwm generator module (0 to 3)
   uint8_t pwm_mod = pwm_to_pwmmod(pwm);       // Convert the pwm to the pwm module (0 or 1)
+  uint16_t duty;
   value = max(min(value, PWM_RES), 0);            // Max value is 12-bit to match the ADC
 
   // Get the offset for the pwmcfg
@@ -38,14 +39,22 @@ void analogWrite(uint8_t pin, uint16_t value) {
   //   clrbit(portData(port, P_AFSEL), pin_mask);  // Regular IO
   //   portData(port, P_PCTL) &= (uint32_t) ~(0xF << (pin_to_port_bit[pin] * 4)); // clear the pin mux control
   //   digitalWrite(pin, HIGH);
+  //   return;
   // } else if (value == 0) {
-  // if(pwm_mod == 0) {
-  //   PWM0_ENABLE_R &= ~(_8bit_mask[pwm_ena]);
+  //   // Disable PWM output
+  //   if(pwm_mod == 0) {
+  //     PWM0_ENABLE_R &= ~(_8bit_mask[pwm_ena]);
+  //   } else {
+  //     PWM1_ENABLE_R &= ~(_8bit_mask[pwm_ena]);
+  //   }
+  //   return;
   // } else {
-  //   PWM1_ENABLE_R |= ~(_8bit_mask[pwm_ena]);
-  // }
+  //   // Enable PWM output
+  //   PWM1_ENABLE_R |= _8bit_mask[pwm_ena];
   // }
 
+  duty = ((uint16_t) round(PWM_PERIOD * (((double) value)/((double) PWM_RES))));
+  duty = max(min(duty, PWM_RES), 0);
   // setup gpio as pwm if it's not already (Check if the PWM bits have been set)
   // Stuff in here only needs to be set first time PWM is setup for this pin
   if(((portData(port, P_PCTL) >> pctl_shift) & 0x07) < 4) {
