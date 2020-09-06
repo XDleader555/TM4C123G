@@ -32,8 +32,9 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "tm4c123gh6pm.h"
+#include "pins.h"
 
-extern volatile unsigned long clockDelay;
+static volatile unsigned long clockDelay;
 
 /**
  * Friendly timer initialization function.

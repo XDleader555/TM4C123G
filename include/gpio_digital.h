@@ -29,6 +29,8 @@
 #include "tm4c123gh6pm.h"
 #include "pins.h"
 
+static volatile unsigned long clockDelay;
+
 // gpio directions
 #define OUTPUT 0
 #define INPUT 1

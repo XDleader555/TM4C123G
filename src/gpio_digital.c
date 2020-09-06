@@ -1,6 +1,6 @@
 #include "gpio_digital.h"
 
-volatile unsigned long clockDelay;
+static volatile unsigned long clockDelay;
 
 static GPIOPort_ISR GPIOPortA_ISR[8];
 static GPIOPort_ISR GPIOPortB_ISR[8];

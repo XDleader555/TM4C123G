@@ -1,5 +1,7 @@
 #include "timer.h"
 
+static volatile unsigned long clockDelay;
+
 static void (*_Timer0A_Handler)(void);
 
 // http://shukra.cedt.iisc.ernet.in/edwiki/EmSys:TM4C123_Timer_Programming
