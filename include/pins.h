@@ -24,58 +24,90 @@
 #define PINS_H
 
 #include "tm4c123gh6pm.h"
+#include <stdint.h>
+#include <stddef.h>
 
-extern volatile unsigned long * ports[];
+#define pwmgen_to_pwmmod(pwm_gen) ((pwm_mod < 9) ? 0 : 1)
+#define pwmgen_to_pwmmodaddr(pwm_gen) ((pwm_mod < 9) ? &PWM0_0_CTL_R : &PWM1_0_CTL_R)
 
-// Arbitray numbers, the first being the port, and the second being the gpio
-#define PA0 (00)
-#define PA1 (01)
-#define PA2 (02)
-#define PA3 (03)
-#define PA4 (04)
-#define PA5 (05)
-#define PA6 (06)
-#define PA7 (07)
+extern volatile unsigned long * port_addrs[];
+extern volatile uint8_t pin_to_pwm_gen[];
+extern volatile uint8_t pin_to_port[];
+extern volatile uint8_t pin_to_pin_mask[];
+extern volatile uint8_t pin_to_port_bit[];
+extern volatile uint8_t port_to_port_mask[];
 
-#define PB0 (10)
-#define PB1 (11)
-#define PB2 (12)
-#define PB3 (13)
-#define PB4 (14)
-#define PB5 (15)
-#define PB6 (16)
-#define PB7 (17)
+// PWM modulators
+#define NOPWM   0
+#define M0PWM0  1
+#define M0PWM1  2
+#define M0PWM2  3
+#define M0PWM3  4
+#define M0PWM4  5
+#define M0PWM5  6
+#define M0PWM6  7
+#define M0PWM7  8
+#define M1PWM0  9
+#define M1PWM1  10
+#define M1PWM2  11
+#define M1PWM3  12
+#define M1PWM4  13
+#define M1PWM5  14
+#define M1PWM6  15
+#define M1PWM7  16
 
-#define PC0 (20)
-#define PC1 (21)
-#define PC2 (22)
-#define PC3 (23)
-#define PC4 (24)
-#define PC5 (25)
-#define PC6 (26)
-#define PC7 (27)
+// Ports
+#define PA 0
+#define PB 1
+#define PC 2
+#define PD 3
+#define PE 4
+#define PF 5
 
-#define PD0 (30)
-#define PD1 (31)
-#define PD2 (32)
-#define PD3 (33)
-#define PD4 (34)
-#define PD5 (35)
-#define PD6 (36)
-#define PD7 (37)
-
-#define PE0 (40)
-#define PE1 (41)
-#define PE2 (42)
-#define PE3 (43)
-#define PE4 (44)
-#define PE5 (45)
-
-#define PF0 (50)
-#define PF1 (51)
-#define PF2 (52)
-#define PF3 (53)
-#define PF4 (54)
+// Pins (43 in total)
+#define PA0 0
+#define PA1 1
+#define PA2 2
+#define PA3 3
+#define PA4 4
+#define PA5 5
+#define PA6 6
+#define PA7 7
+#define PB0 8
+#define PB1 9
+#define PB2 10
+#define PB3 11
+#define PB4 12
+#define PB5 13
+#define PB6 14
+#define PB7 15
+#define PC0 16
+#define PC1 17
+#define PC2 18
+#define PC3 19
+#define PC4 20
+#define PC5 21
+#define PC6 22
+#define PC7 23
+#define PD0 24
+#define PD1 25
+#define PD2 26
+#define PD3 27
+#define PD4 28
+#define PD5 29
+#define PD6 30
+#define PD7 31
+#define PE0 32
+#define PE1 33
+#define PE2 34
+#define PE3 35
+#define PE4 36
+#define PE5 37
+#define PF0 38
+#define PF1 39
+#define PF2 40
+#define PF3 41
+#define PF4 42
 
 // Port data offsets
 #define P_DATA      ((unsigned long) 0x3FC)
